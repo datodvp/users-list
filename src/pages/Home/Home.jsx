@@ -1,21 +1,38 @@
 import { useEffect, useState } from 'react';
 import getUsers from '../../api/getUsers';
+import { infiniteScroll } from '../../utils';
+import LoadingImg from '../../images/loading.svg';
 import './styles.scss';
 
 const Home = () => {
   const [usersList, setUsersList] = useState([]);
-  console.log(usersList);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getUsers().then((data) => {
-      setUsersList(data.list);
+    getUsers(page, 20).then((data) => {
+      setUsersList((prev) => {
+        setLoading(false);
+        return [...prev, ...data.list];
+      });
     });
+  }, [page]);
+
+  useEffect(() => {
+    window.addEventListener('scroll', () => {
+      infiniteScroll(setPage, setLoading);
+    });
+
+    return () =>
+      window.removeEventListener('scroll', () => {
+        infiniteScroll(setPage, setLoading);
+      });
   }, []);
 
   return (
     <>
       <div className="list">
-        {usersList
+        {usersList.length
           ? usersList.map((user) => {
               return (
                 <div key={user.id} className="list-item">
@@ -29,7 +46,14 @@ const Home = () => {
                 </div>
               );
             })
-          : 'Loading...'}
+          : 'No Users'}
+        {loading && (
+          <img
+            src={LoadingImg}
+            alt="loading"
+            style={{ width: '80px', margin: '50px auto' }}
+          />
+        )}
       </div>
     </>
   );
