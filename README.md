@@ -1,4 +1,4 @@
-## how to start a project
+## how to start the project
 
 In the project directory, you can run:
 
