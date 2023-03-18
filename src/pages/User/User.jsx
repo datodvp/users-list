@@ -1,15 +1,44 @@
 import { useEffect, useState } from 'react';
 import getUser from '../../api/getUser';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { infiniteScroll } from '../../utils';
 import './styles.scss';
+import LoadingImg from '../../images/loading.svg';
+import getUserFriends from '../../api/getUserFriends';
 
 const User = () => {
   const [userData, setUserData] = useState(null);
+  const [friendsPage, setFriendsPage] = useState(1);
+  const [friendsList, setFriendsList] = useState([]);
+  const [loading, setLoading] = useState(true);
   let { id } = useParams();
 
   useEffect(() => {
     getUser(id).then((data) => setUserData(data));
+    setFriendsList([]);
   }, [id]);
+
+  useEffect(() => {
+    getUserFriends(id, friendsPage, 20).then((data) =>
+      setFriendsList((prev) => {
+        setLoading(false);
+        return [...prev, ...data.list];
+      })
+    );
+    // eslint-disable-next-line
+  }, [friendsPage, id]);
+
+  useEffect(() => {
+    window.addEventListener('scroll', () => {
+      infiniteScroll(setFriendsPage, setLoading);
+    });
+
+    return () =>
+      window.removeEventListener('scroll', () => {
+        infiniteScroll(setFriendsPage, setLoading);
+      });
+  }, []);
+
   if (!userData) {
     return 'Loading...';
   }
@@ -68,6 +97,28 @@ const User = () => {
 
       <div className="friends">
         <h2>Friends:</h2>
+        <div className="list">
+          {friendsList.map((user) => {
+            return (
+              <Link key={user.id} className="list-item" to={`/user/${user.id}`}>
+                <div className="content">
+                  <img src={`${user.imageUrl}?v=${user.id}`} alt="user"></img>
+                  <div className="description">
+                    <strong>{`${user.prefix} ${user.name} ${user.lastName}`}</strong>
+                  </div>
+                  <div className="description">{user.title}</div>
+                </div>
+              </Link>
+            );
+          })}
+          {loading && (
+            <img
+              src={LoadingImg}
+              alt="loading"
+              style={{ width: '80px', margin: '50px auto' }}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
