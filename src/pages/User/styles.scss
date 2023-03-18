@@ -1,0 +1,36 @@
+.user {
+  max-width: 1200px;
+  margin: 0 auto;
+  border: 1px solid #ccc;
+  .header {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    align-items: center;
+
+    img {
+      height: 200px;
+    }
+
+    .left-info {
+      margin-left: 20px;
+      width: 100%;
+    }
+
+    .left-info span,
+    .right-info span {
+      text-decoration: underline;
+    }
+  }
+  @media only screen and (max-width: 990px) {
+    .header {
+      flex-direction: column;
+      align-items: unset;
+
+      .left-info {
+        margin-left: 0;
+        width: auto;
+      }
+    }
+  }
+}
